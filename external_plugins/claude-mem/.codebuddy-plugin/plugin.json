@@ -1,0 +1,21 @@
+{
+  "name": "claude-mem",
+  "description": "Persistent memory system for CodeBuddy Code - seamlessly preserve context across sessions",
+  "author": {
+    "name": "Alex Newman"
+  },
+  "repository": "https://github.com/thedotmack/claude-mem",
+  "homepage": {
+    "url": "https://claude-mem.ai",
+    "type": "official"
+  },
+  "license": "AGPL-3.0",
+  "version": "9.1.1",
+  "keywords": [
+    "memory",
+    "context",
+    "persistence",
+    "hooks",
+    "mcp"
+  ]
+}
