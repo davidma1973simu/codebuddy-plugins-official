@@ -358,6 +358,20 @@
       "description": "Real-time statusline HUD for Claude Code - displays context usage, tool activity, agent tracking, and todo progress",
       "license": "MIT"
     },
+     {
+      "name": "cloudbase",
+      "source": "./plugins/cloudbase",
+      "version": "1.0.0",
+      "description": "CloudBase AI 开发插件，提供 Web、小程序、云函数、CloudRun、数据库（NoSQL/MySQL）、云存储、AI 模型、UI 设计等全栈开发能力。",
+      "author": {
+        "name": "CloudBase Team"
+      },
+      "homepage": {
+        "url": "https://github.com/TencentCloudBase/cloudbase-ai-toolkit",
+        "type": "github"
+      },
+      "license": "MIT"
+    },
     {
       "name": "cloud-infrastructure",
       "description": "云架构设计（AWS/Azure/GCP），Kubernetes 集群配置，Terraform 基础设施即代码，混合云网络，以及多云成本优化",
