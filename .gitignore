@@ -9,6 +9,3 @@ __MACOSX/
 .codebuddy-plugin/*
 !.codebuddy-plugin/marketplace.json
 
-plugin-marketplaces.md
-plugins-reference.md
-skills-standard.md

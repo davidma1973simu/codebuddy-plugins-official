@@ -1,9 +1,5 @@
 ---
-description: CloudBase AI 开发插件，提供 Web、小程序、云函数、CloudRun、数据库、AI 模型等全栈开发能力
 alwaysApply: true
-enabled: true
-updatedAt: 2026-03-10T00:00:00.000Z
-provider:
 ---
 
 <system_reminder>
