@@ -19,7 +19,7 @@ A curated collection of 7 top-downloaded AI agent skills, bundled into a single 
 Install via CodeBuddy marketplace:
 
 ```
-/install hotskills
+/install hot-skills
 ```
 
 ## Skill Details
