@@ -7,14 +7,16 @@
 ## 执行清单规划
 
 在开始执行前，工作流需要：
+
 1. 使用 `todo_write` 工具创建执行清单，将下述执行步骤转化为 TODO 列表
 2. 执行应该按照列表的顺序进行执行，禁止跳过步骤
 3. 每完成一个步骤后，需检查步骤是否执行，检查通过后更新对应 TODO 的状态为 `completed`
-3. 开始新步骤时，将对应 TODO 状态更新为 `in_progress`
+4. 开始新步骤时，将对应 TODO 状态更新为 `in_progress`
 
 **标准 TODO 清单模板**：
 
 Demo:
+
 ```json
 [
   {"id":"1", "status":"pending", "content":"step1"},
@@ -27,9 +29,10 @@ Demo:
 
 **步骤 1：确认参考节点列表**
 需根据实际用户的意图选择合适的方式
-- **方式一**：从对话上下文中读取（SKILL加载时已执行 load_session，结果在上下文中）
-- **方式二**：使用 `load_session` 工具（位于 `tools/load_session.md`）读取会话信息
-- **方式三**：使用 `search_nodes` 工具（位于 `tools/search_nodes.md`）从脑图节点中查询
+
+- **方式一**：从对话上下文中读取（SKILL加载时已执行 get_session，结果在上下文中）
+- **方式二**：使用 `get_session` 工具（位于 `references/tools/get_session.md`）读取会话信息
+- **方式三**：使用 `search_nodes` 工具（位于 `references/tools/search_nodes.md`）从脑图节点中查询
 - 节点信息包含：uid, name, kind, instance
 - 如未找到节点信息或信息不完整，提示用户并终止流程
 - 参考节点可能是单个、也可能是多个
@@ -37,17 +40,47 @@ Demo:
 
 **步骤 2：查找关联需求**
 需根据实际用户的意图选择合适的方式
-- **方式一**：从对话上下文中读取（SKILL加载时已执行 load_session，结果在上下文中）
-- **方式二**：使用 `load_session` 工具（位于 `tools/load_session.md`）读取会话信息
-- **方式三**：使用 `search_nodes` 工具（位于 `tools/search_nodes.md`）从脑图查询 STORY 或 BUG 类型节点
+
+- **方式一**：从对话上下文中读取（SKILL加载时已执行 get_session，结果在上下文中）
+- **方式二**：使用 `get_session` 工具（位于 `references/tools/get_session.md`）读取会话信息
+- **方式三**：使用 `search_nodes` 工具（位于 `references/tools/search_nodes.md`）从脑图查询 STORY 或 BUG 类型节点
 - 节点信息包含：uid, name, kind, instance（包含 IssueUid, IssueName 等需求详情）
 - 如未找到需求节点信息，提示用户并终止
 - **禁止**：从其他文件中获取需求信息
 
+**步骤 2.5：确保 STORY/BUG 节点存在**
 
+脑图的节点层级结构为：**DESIGN → STORY/BUG → FEATURE/SCENE/TEST_POINT/CASE**。框架等子节点必须挂在 STORY/BUG 节点下才能正确渲染。因此在生成框架前，必须先确保脑图中存在 STORY/BUG 节点作为父节点。
 
-**步骤 4：检索需求知识库**
-- **使用工具**：`RAG_search`（位于 `tools/rag_search.md`）
+- **判断条件**：步骤 1-2 中未找到 STORY 或 BUG 类型的节点（无论是 chat 模式还是 mindmap 模式，只要脑图中不存在 STORY/BUG 节点就需要创建）
+- **执行逻辑**：
+  1. 根据需求信息构造一个 STORY（或 BUG）节点，格式如下：
+     ```json
+     [
+       {
+         "uid": "story-{10位随机字符}",
+         "name": "{需求标题}",
+         "description": "{需求描述摘要}",
+         "kind": "STORY",
+         "parent_uid": "{design_uid}",
+         "instance": {
+           "workspace": "{TAPD工作空间ID}",
+           "issue_id": "{TAPD需求ID}"
+         }
+       }
+     ]
+     ```
+  2. 将 STORY 节点写入临时文件，使用 `validate_nodes` 校验后通过 `add_nodes` 添加到脑图
+  3. **记录此 STORY 节点的 uid**，后续生成的所有框架节点的 `parent_uid` 必须指向这个 STORY 节点的 uid
+- **如果已存在 STORY/BUG 节点**：跳过创建，直接使用已有节点的 uid 作为后续子节点的 parent_uid
+- **关键约束**：
+  - STORY 节点的 `parent_uid` 必须是 `design_uid`（测试设计的 uid）
+  - STORY 节点的 `instance` 必须包含 `workspace`（TAPD工作空间ID）和 `issue_id`（需求ID）
+  - 如果是 BUG 类型需求，将 `kind` 设为 `"BUG"`
+
+**步骤 3：检索需求知识库**
+
+- **使用工具**：`RAG_search`（位于 `references/tools/rag_search.md`）
 - **检索目标**：从需求分析结果中提取关键词进行检索
   - **关键词提取方法**：
     - 从步骤3的需求分析结果中识别核心功能模块（如"用户登录"、"权限管理"、"数据导出"）
@@ -64,11 +97,12 @@ Demo:
     - 合并后的完整文档作为后续用例生成的输入
 - **说明**：工具内部会自动判断是否有可用的知识库，无需手动判断
 
-**步骤 3：需求分析**
-- **使用工具**：`select_rule`（位于 `tools/select_rule`），传入关键词"需求分析"
+**步骤 4：需求分析**
+
+- **使用工具**：`select_rule`（位于 `references/tools/select_rule`），传入关键词"需求分析"
 - **根据返回结果**：
   - 如果返回自定义规则路径（`.codebuddy/rules/xxx`）：使用 `read_rules` 读取规则内容
-  - 如果返回默认Generator路径（`generators/xxx`）：使用 `read_file` 读取 Generator 内容
+  - 如果返回默认Generator路径（`references/generators/xxx`）：使用 `read_file` 读取 Generator 内容
 - **执行方式**：按获取到的规则/Generator定义执行需求分析
 - **标准输入参数**
   ```python
@@ -81,13 +115,12 @@ Demo:
 - **输出**：需求分析文档结果
 - **复用逻辑**：如该需求已分析过，直接使用历史分析文档
 
-
-
 **步骤 5：生成测试用例**
-- **使用工具**：`select_rule`（位于 `tools/select_rule`），传入关键词"用例生成"
+
+- **使用工具**：`select_rule`（位于 `references/tools/select_rule`），传入关键词"用例生成"
 - **根据返回结果**：
   - 如果返回自定义规则路径（`.codebuddy/rules/xxx`）：使用 `read_rules` 读取规则内容
-  - 如果返回默认Generator路径（`generators/xxx`）：使用 `read_file` 读取 Generator 内容
+  - 如果返回默认Generator路径（`references/generators/xxx`）：使用 `read_file` 读取 Generator 内容
 - **执行方式**：按获取到的规则/Generator定义执行用例生成
 - **标准输入参数**:
   ```python
@@ -104,12 +137,13 @@ Demo:
   }
   ```
 - **输出要求**：
-  - ✅ **必须输出标准JSON数组格式**（参考 `generators/case-generator.md`）
+  - ✅ **必须输出标准JSON数组格式**（参考 `references/generators/case-generator.md`）
   - ✅ 每个用例节点必须包含完整字段：`uid`, `name`, `description`, `kind`, `parent_uid`, `instance`
   - ✅ 所有字符串必须正确转义特殊字符（引号、换行符等）
   - ❌ 禁止使用YAML格式
   - ❌ 禁止在JSON中添加注释
 
 **步骤 6：添加节点到脑图**
-- **使用工具**：`add_nodes`
-- **说明**：将生成的模块节点添加到脑图并渲染，参考 `tools/add_nodes.md`
+
+- **使用工具**：`add_nodes`(位于`references/tools/add_nodes.md`)
+- **说明**：将生成的模块节点添加到脑图，参考 `references/tools/add_nodes.md`

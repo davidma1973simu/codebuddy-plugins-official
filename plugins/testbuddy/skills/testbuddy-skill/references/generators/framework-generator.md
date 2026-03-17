@@ -176,24 +176,26 @@ ${issue_analysis}
 
 ## 字段说明
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `uid` | string | ✅ | 节点唯一标识，格式：`{kind}-{随机字符}` |
-| `name` | string | ✅ | 节点名称，简洁明确 |
-| `description` | string | ✅ | 节点详细描述 |
-| `kind` | string | ✅ | 节点类型：`FEATURE`/`SCENE`/`TEST_POINT` |
-| `parent_uid` | string | ✅ | 仅根节点需要，使用 `ref_nodes` 中的 uid |
-| `children` | array | ❌ | 子节点数组，可选 |
+| 字段          | 类型   | 必填 | 说明                                     |
+| ------------- | ------ | ---- | ---------------------------------------- |
+| `uid`         | string | ✅   | 节点唯一标识，格式：`{kind}-{随机字符}`  |
+| `name`        | string | ✅   | 节点名称，简洁明确                       |
+| `description` | string | ✅   | 节点详细描述                             |
+| `kind`        | string | ✅   | 节点类型：`FEATURE`/`SCENE`/`TEST_POINT` |
+| `parent_uid`  | string | ✅   | 仅根节点需要，使用 `ref_nodes` 中的 uid  |
+| `children`    | array  | ❌   | 子节点数组，可选                         |
 
 ## 特殊字符处理规则
 
 在JSON字符串中，以下字符必须转义：
+
 - 双引号：`"` → `\"`
 - 反斜杠：`\` → `\\`
 - 换行符：不允许使用真实换行，用 `\n` 或用逗号/分号分隔
 - 制表符：`\t`
 
 **示例**：
+
 ```json
 {
   "name": "用户\"认证\"模块",

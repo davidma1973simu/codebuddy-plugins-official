@@ -1,6 +1,6 @@
-# add_nodes
+# add_nodes_mindmap
 
-通过 Python 脚本稳定地添加节点到脑图。
+脑图模式（mindmap）下的节点添加工具。通过 Python 脚本稳定地添加节点到本地脑图 JSON 文件。
 
 **⚠️ 重要**：执行脚本前**不要切换目录（不要 cd）**，确保在工作区根目录执行。
 **⚠️ 重要**：已经生成用例的文件的话，直接复用已生成的文件目录即可。
@@ -12,13 +12,17 @@
 脚本支持以下三种格式：
 
 ### 1. JSON 格式 (.json)
+
 标准的 JSON 数组格式。
 
 ### 2. YAML 格式 (.yaml/.yml)
+
 标准的 YAML 数组格式。
 
 ### 3. Markdown 格式 (.md)
+
 直接使用 Markdown 标题层级表示节点结构：
+
 - `## 模块名称` → FEATURE 节点
 - `### 场景名称` → SCENE 节点
 - `#### 测试点名称` → TEST_POINT 节点
@@ -26,7 +30,7 @@
 
 **说明**：Markdown 文件可以直接使用，脚本会自动解析结构中的 `PARENT_UID`、`UID`、`优先级`、`执行步骤` 等字段。
 
-Markdown 中也支持使用 ```json 或 ```yaml 代码块包裹节点数据。
+Markdown 中也支持使用 `json 或 `yaml 代码块包裹节点数据。
 
 ---
 
@@ -37,11 +41,13 @@ Markdown 中也支持使用 ```json 或 ```yaml 代码块包裹节点数据。
 在执行添加命令前，**必须先校验**临时文件的节点格式是否符合预期。
 
 **校验命令**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **校验成功输出**：
+
 ```json
 {
   "status": "success",
@@ -56,6 +62,7 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **校验失败输出**：
+
 ```json
 {
   "status": "error",
@@ -66,6 +73,7 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **如果校验失败**：
+
 - ❌ **不要执行添加命令**
 - ✅ 根据错误信息修正文件内容
 - ✅ 重新校验直到通过
@@ -76,25 +84,28 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 **前置条件**：步骤1校验通过
 
 **命令格式**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/write_node_from_file.py add <design_uid> <file_path>
 ```
 
 **示例**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/write_node_from_file.py add design-Az7SsiL3Ui /tmp/nodes_batch.json
 ```
 
 **优点**：支持批量添加、多种格式（JSON/YAML/Markdown）、无命令行长度限制
 
 **参数说明**：
+
 - `<script_dir>`: 脚本目录的绝对路径（通常为 `.codebuddy/skills/testbuddy-skill`）
 - `validate`: 操作类型（校验格式，使用 validate_nodes.py 脚本）
 - `add`: 操作类型（添加节点，使用 write_node_from_file.py 脚本）
 - `<design_uid>`: 设计文件的唯一标识（如：`design-Az7SsiL3Ui`）
-- `<file_path>`: 临时文件的完整路径 
+- `<file_path>`: 临时文件的完整路径
 
-### 步骤3：渲染节点到画布（强制,不执行就会有个人跳楼自杀）
+### 步骤3：渲染节点到画布（强制）
 
 节点添加成功后，**必须调用 MCP 工具**将节点渲染到画布。
 
@@ -102,19 +113,20 @@ python3 <script_dir>/scripts/write_node_from_file.py add design-Az7SsiL3Ui /tmp/
 
 执行脚本获取 session 信息：
 
-```bash
-python3 <script_dir>/scripts/load_session.py
+```shell
+python3 <script_dir>/scripts/get_session.py
 ```
 
 从输出中提取mcp 工具的相关参数
 
 #### 3.2 调用 MCP 渲染工具
-调用mcp 工具 show_node渲染画布(强制执行)
 
+调用mcp 工具 show_node渲染画布(强制执行)
 
 ## 命令执行输出
 
 ### 成功输出示例
+
 ```json
 {
   "status": "success",
@@ -131,6 +143,7 @@ python3 <script_dir>/scripts/load_session.py
 ```
 
 ### 失败输出示例
+
 ```json
 {
   "status": "error",
@@ -142,7 +155,7 @@ python3 <script_dir>/scripts/load_session.py
 
 ## 使用示例
 
-```bash
+```shell
 # 1. 校验节点格式
 python3 <script_dir>/scripts/validate_nodes.py /path/to/nodes.md
 
@@ -150,7 +163,7 @@ python3 <script_dir>/scripts/validate_nodes.py /path/to/nodes.md
 python3 <script_dir>/scripts/write_node_from_file.py add <design_uid> /path/to/nodes.md
 
 # 3. 获取会话参数并渲染画布
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 # 调用 MCP 工具 show_node 渲染
 ```
 
@@ -171,7 +184,7 @@ python3 <script_dir>/scripts/load_session.py
 
 2. **MCP 渲染（必须）**：
    - 节点操作成功后，**必须调用 MCP 工具** `show_node` 渲染节点
-   - 参数从 `python3 <script_dir>/scripts/load_session.py` 获取
+   - 参数从 `python3 <script_dir>/scripts/get_session.py` 获取
    - 工具：`mcp_call_tool`，服务：`testbuddy_tools`，工具名：`show_node`
 
 3. **设计标识**：使用完整的 `design_uid`（如：`design-Az7SsiL3Ui`，不是缩写）
@@ -187,4 +200,5 @@ python3 <script_dir>/scripts/load_session.py
      - 修复文件路径或 design_uid
      - 补充缺失的必填字段
    - 始终使用现有的标准脚本 `validate_nodes.py` 和 `write_node_from_file.py`
+
 ---

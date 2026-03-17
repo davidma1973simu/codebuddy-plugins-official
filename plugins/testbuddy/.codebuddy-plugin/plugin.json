@@ -1,6 +1,6 @@
 {
   "name": "testbuddy",
-  "version": "1.6.7",
+  "version": "1.0.1",
   "description": "文本测试用例生成插件。主要用于文本测试用例生成、文本测试用例框架生成、脑图用例生成、召回、需求分析等文本测试用例生成",
   "author": {
     "name": "jeriezhang",
@@ -11,5 +11,5 @@
   "category": "测试工具",
   "commands": ["./commands/chat_design.md", "./commands/open_design.md"],
   "agents": [],
-  "skills": ["./skills/testbuddy-skill"]
+  "skills": ["./skills/testbuddy-skill", "./skills/testbuddy-ext-skill"]
 }
