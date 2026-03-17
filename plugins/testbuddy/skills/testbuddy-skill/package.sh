@@ -15,64 +15,64 @@ NC='\033[0m' # No Color
 
 # 打印信息
 print_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+  echo -e "${GREEN}[INFO]${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+  echo -e "${RED}[ERROR]${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+  echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 # 参数验证
 if [ -z "$1" ]; then
-    print_error "请提供版本号"
-    echo "用法: $0 <version>"
-    echo "示例: $0 1.5.0"
-    exit 1
+  print_error "请提供版本号"
+  echo "用法: $0 <version>"
+  echo "示例: $0 1.5.0"
+  exit 1
 fi
 
 version=$1
 
 # 验证版本号格式（简单的语义化版本检查）
 if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    print_warning "版本号格式不符合语义化版本规范（x.y.z），但继续打包"
+  print_warning "版本号格式不符合语义化版本规范（x.y.z），但继续打包"
 fi
 
 # 检查源目录是否存在
 if [ ! -d "$SOURCE_DIR" ]; then
-    print_error "技能包源目录不存在: $SOURCE_DIR"
-    exit 1
+  print_error "技能包源目录不存在: $SOURCE_DIR"
+  exit 1
 fi
 
 # 检查必要文件是否存在
 required_files=("README.md" "SKILL.md")
 missing_files=()
 for file in "${required_files[@]}"; do
-    if [ ! -f "${SOURCE_DIR}/${file}" ]; then
-        missing_files+=("$file")
-    fi
+  if [ ! -f "${SOURCE_DIR}/${file}" ]; then
+    missing_files+=("$file")
+  fi
 done
 
 if [ ${#missing_files[@]} -gt 0 ]; then
-    print_error "缺少必要文件: ${missing_files[*]}"
-    exit 1
+  print_error "缺少必要文件: ${missing_files[*]}"
+  exit 1
 fi
 
 # 检查子目录
 required_dirs=("tools" "workflows")
 missing_dirs=()
 for dir in "${required_dirs[@]}"; do
-    if [ ! -d "${SOURCE_DIR}/${dir}" ]; then
-        missing_dirs+=("$dir")
-    fi
+  if [ ! -d "${SOURCE_DIR}/${dir}" ]; then
+    missing_dirs+=("$dir")
+  fi
 done
 
 if [ ${#missing_dirs[@]} -gt 0 ]; then
-    print_error "缺少必要目录: ${missing_dirs[*]}"
-    exit 1
+  print_error "缺少必要目录: ${missing_dirs[*]}"
+  exit 1
 fi
 
 # 输出包名
@@ -92,30 +92,30 @@ DIR_NAME=$(basename "${SOURCE_DIR}")
 
 # 如果已存在同名文件，询问是否覆盖
 if [ -f "$PACKAGE_PATH" ]; then
-    print_warning "文件已存在: $PACKAGE_PATH"
-    read -p "是否覆盖？(y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_info "已取消打包"
-        exit 0
-    fi
-    rm -f "$PACKAGE_PATH"
-    print_info "已删除旧文件"
+  print_warning "文件已存在: $PACKAGE_PATH"
+  read -p "是否覆盖？(y/N): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    print_info "已取消打包"
+    exit 0
+  fi
+  rm -f "$PACKAGE_PATH"
+  print_info "已删除旧文件"
 fi
 
 # 执行打包（排除package.sh自身和已有的zip文件）
 if zip -r "$PACKAGE_PATH" "${DIR_NAME}/" -x "${DIR_NAME}/package.sh" "${DIR_NAME}/*.zip" "${DIR_NAME}/*.tar.gz"; then
-    # 显示打包结果
-    file_size=$(du -h "$PACKAGE_PATH" | cut -f1)
-    print_info "打包成功！"
-    echo "  文件名: $PACKAGE_NAME"
-    echo "  文件大小: $file_size"
-    echo "  文件路径: $PACKAGE_PATH"
-    
-    # 显示包内容统计
-    file_count=$(unzip -l "$PACKAGE_PATH" | tail -1 | awk '{print $2}')
-    print_info "包含文件数: $file_count"
+  # 显示打包结果
+  file_size=$(du -h "$PACKAGE_PATH" | cut -f1)
+  print_info "打包成功！"
+  echo "  文件名: $PACKAGE_NAME"
+  echo "  文件大小: $file_size"
+  echo "  文件路径: $PACKAGE_PATH"
+
+  # 显示包内容统计
+  file_count=$(unzip -l "$PACKAGE_PATH" | tail -1 | awk '{print $2}')
+  print_info "包含文件数: $file_count"
 else
-    print_error "打包失败"
-    exit 1
+  print_error "打包失败"
+  exit 1
 fi

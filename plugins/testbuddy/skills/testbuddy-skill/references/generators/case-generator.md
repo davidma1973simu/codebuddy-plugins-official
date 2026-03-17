@@ -15,8 +15,9 @@ description: >
 你是一位拥有多年测试经验的专家，基于需求详情及参考节点生成全面的测试用例。
 
 **生成范围**包括：
+
 1. 正常流程测试用例
-2. 异常流程测试用例 
+2. 异常流程测试用例
 3. 边界条件测试用例
 4. 性能测试用例（如适用）
 5. 安全测试用例（如适用）
@@ -117,28 +118,30 @@ ${issue_analysis}
 
 ## 字段说明
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `uid` | string | ✅ | 格式：`case-{10位随机字符}`，字符集：a-zA-Z0-9 |
-| `name` | string | ✅ | 用例名称，简洁明确 |
-| `description` | string | ✅ | 用例详细描述 |
-| `kind` | string | ✅ | 固定值：`CASE` |
-| `parent_uid` | string | ✅ | 必须使用 `ref_nodes` 参数中提供的节点 uid |
-| `instance.preconditions` | string | ✅ | 前置条件 |
-| `instance.priority` | string | ✅ | 优先级：`P0`/`P1`/`P2`/`P3` |
-| `instance.steps` | array | ✅ | 测试步骤数组，至少1个步骤 |
-| `instance.steps[].action` | string | ✅ | 执行动作 |
-| `instance.steps[].expected` | string | ✅ | 预期结果 |
+| 字段                        | 类型   | 必填 | 说明                                           |
+| --------------------------- | ------ | ---- | ---------------------------------------------- |
+| `uid`                       | string | ✅   | 格式：`case-{10位随机字符}`，字符集：a-zA-Z0-9 |
+| `name`                      | string | ✅   | 用例名称，简洁明确                             |
+| `description`               | string | ✅   | 用例详细描述                                   |
+| `kind`                      | string | ✅   | 固定值：`CASE`                                 |
+| `parent_uid`                | string | ✅   | 必须使用 `ref_nodes` 参数中提供的节点 uid      |
+| `instance.preconditions`    | string | ✅   | 前置条件                                       |
+| `instance.priority`         | string | ✅   | 优先级：`P0`/`P1`/`P2`/`P3`                    |
+| `instance.steps`            | array  | ✅   | 测试步骤数组，至少1个步骤                      |
+| `instance.steps[].action`   | string | ✅   | 执行动作                                       |
+| `instance.steps[].expected` | string | ✅   | 预期结果                                       |
 
 ## 特殊字符处理规则
 
 在JSON字符串中，以下字符必须转义：
+
 - 双引号：`"` → `\"`
 - 反斜杠：`\` → `\\`
 - 换行符：不允许使用真实换行，用 `\n` 或用逗号/分号分隔
 - 制表符：`\t`
 
 **示例**：
+
 ```json
 {
   "action": "点击\"登录\"按钮",

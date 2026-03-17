@@ -23,6 +23,7 @@
 通过UID在JSON中定位要删除的节点。递归遍历节点树，找到匹配的节点。
 
 #### 节点类型枚举
+
 - `STORY` - 需求
 - `BUG` - 缺陷
 - `FEATURE` - 功能模块
@@ -35,6 +36,7 @@
 **重要**：删除节点会同时删除其所有子节点（递归删除）。
 
 在执行删除前，应该：
+
 1. 确认要删除的节点
 2. 列出该节点的所有子孙节点（如有）
 3. 询问用户确认（如果子节点较多）
@@ -42,16 +44,19 @@
 ### 步骤4：执行删除命令
 
 **命令格式**：
-```bash
+
+```shell
 echo '["uid1", "uid2"]' | python3 <script_dir>/scripts/write_nodes.py delete <design_uid>
 ```
 
 **示例**：
-```bash
+
+```shell
 echo '["test_point-fvcfvuh9g2", "case-cf89EaXfQ2"]' | python3 <script_dir>/scripts/write_nodes.py delete design-Az7SsiL3Ui
 ```
 
 **参数说明**：
+
 - `<script_dir>`: 脚本目录的绝对路径（通常为 `.codebuddy/skills/testbuddy-skill`）
 - `delete`: 操作类型（删除节点）
 - `<design_uid>`: 设计文件的唯一标识（如：`design-Az7SsiL3Ui`）
@@ -68,11 +73,12 @@ echo '["test_point-fvcfvuh9g2", "case-cf89EaXfQ2"]' | python3 <script_dir>/scrip
 
 执行脚本获取 session 信息：
 
-```bash
-python3 <script_dir>/scripts/load_session.py
+```shell
+python3 <script_dir>/scripts/get_session.py
 ```
 
 **输出示例**：
+
 ```json
 {
   "design_uid": "design-yeAkhG7cH5",
@@ -102,6 +108,7 @@ python3 <script_dir>/scripts/load_session.py
 ## 命令执行输出
 
 ### 成功输出示例
+
 ```json
 {
   "status": "success",
@@ -118,6 +125,7 @@ python3 <script_dir>/scripts/load_session.py
 ```
 
 ### 失败输出示例
+
 ```json
 {
   "status": "error",
@@ -135,12 +143,12 @@ python3 <script_dir>/scripts/load_session.py
 
 **操作流程**：
 
-```bash
+```shell
 # 步骤4: 执行删除命令
 echo '["test_point-fvcfvuh9g2"]' | python3 <script_dir>/scripts/write_nodes.py delete design-Az7SsiL3Ui
 
 # 步骤5.1: 获取渲染参数
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 
 # 步骤5.2: 调用 MCP 工具渲染
 # 工具名: show_node, 服务名: testbuddy_tools
@@ -155,12 +163,12 @@ python3 <script_dir>/scripts/load_session.py
 
 **操作流程**：
 
-```bash
+```shell
 # 步骤4: 执行删除命令（包含所有子孙节点UID）
 echo '["test_point-WmaL4qejAu", "case-cf89EaXfQ2"]' | python3 <script_dir>/scripts/write_nodes.py delete design-Az7SsiL3Ui
 
 # 步骤5.1: 获取渲染参数
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 
 # 步骤5.2: 调用 MCP 工具渲染
 ```
@@ -175,12 +183,12 @@ python3 <script_dir>/scripts/load_session.py
 
 **操作流程**：
 
-```bash
+```shell
 # 步骤4: 执行删除命令
 echo '["test_point-WmaL4qejAu", "case-cf89EaXfQ2", "test_point-fvcfvuh9g2"]' | python3 <script_dir>/scripts/write_nodes.py delete design-Az7SsiL3Ui
 
 # 步骤5.1: 获取渲染参数
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 
 # 步骤5.2: 调用 MCP 工具渲染
 ```
@@ -193,12 +201,12 @@ python3 <script_dir>/scripts/load_session.py
 
 **操作流程**：
 
-```bash
+```shell
 # 步骤4: 执行删除命令
 echo '["case-TLe94mwFoQ"]' | python3 <script_dir>/scripts/write_nodes.py delete design-Az7SsiL3Ui
 
 # 步骤5.1: 获取渲染参数
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 
 # 步骤5.2: 调用 MCP 工具渲染
 ```
@@ -208,18 +216,23 @@ python3 <script_dir>/scripts/load_session.py
 ## 常见删除场景
 
 ### 1. 清理测试数据
+
 删除测试用的临时节点
 
 ### 2. 移除重复节点
+
 删除重复或错误创建的节点
 
 ### 3. 重构测试结构
+
 删除旧的测试点，准备创建新的结构
 
 ### 4. 删除失效用例
+
 删除不再适用的测试用例
 
 ### 5. 批量清理
+
 删除某个模块下的所有节点
 
 ---
@@ -232,7 +245,7 @@ python3 <script_dir>/scripts/load_session.py
 
 2. **MCP 渲染（必须）**：
    - 节点操作成功后，**必须调用 MCP 工具** `show_node` 渲染节点
-   - 参数从 `python3 <script_dir>/scripts/load_session.py` 获取
+   - 参数从 `python3 <script_dir>/scripts/get_session.py` 获取
    - 工具：`mcp_call_tool`，服务：`testbuddy_tools`，工具名：`show_node`
 
 3. **递归删除**：删除节点时必须包含所有子孙节点的UID

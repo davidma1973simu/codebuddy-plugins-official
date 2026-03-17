@@ -15,6 +15,7 @@
 通过 MCP 工具 `retrieve_knowledge` 检索当前会话相关的知识内容。
 
 **MCP 工具参数说明：**
+
 - `token`: 用户 token，从 `.testbuddy/env/session.json` 获取
 - `query`: 检索查询字符串，描述要查找的内容（**每次只能传一个查询关键词**）
 - `knowledge_uids`: 知识库 UID 列表，指定要检索的知识库
@@ -26,20 +27,20 @@
 **执行步骤：**
 
 1. **获取会话信息**
-   
+
    执行脚本获取 session.json 内容：
-   
+
    ```bash
-   python <script_dir>/scripts/load_session.py
+   python <script_dir>/scripts/get_session.py
    ```
-   
+
    脚本会读取 `.testbuddy/env/session.json` 文件，从中提取：
    - `token`: 用户认证 token
    - `knowledge_uids`: 知识库 UID 列表
    - 其他会话相关参数
 
 2. **调用 MCP 工具检索知识**
-   
+
    使用提取的参数调用 MCP 工具：
    - 首先使用 `mcp_get_tool_description` 获取 `retrieve_knowledge` 工具描述
    - 然后使用 `mcp_call_tool` 调用 `retrieve_knowledge` 工具
@@ -82,9 +83,11 @@
 ## 参数说明
 
 ### 用户输入参数
+
 - `queryString`: 搜索关键词或查询语句，例如：'登录用例'、'支付功能测试'、'性能测试场景'等
 
 ### MCP 工具参数（从 session.json 自动提取）
+
 - `token`: 用户 token（必填）
 - `query`: 检索查询字符串（必填，**每次只能传一个关键词**）
 - `knowledge_uids`: 知识库 UID 列表（必填）
@@ -94,9 +97,11 @@
 **⚠️ 注意**：如需使用多个关键词检索（如"登录功能"、"密码验证"、"权限管理"），需要分批调用 MCP 工具，每个关键词调用一次。
 
 ### 脚本路径
+
 - `<script_dir>`: 脚本目录的绝对路径（通常为 `.codebuddy/skills/testbuddy-skill`）
 
 ### 数据文件
+
 - `.testbuddy/env/session.json`: 存储 token 和 knowledge_uids 等会话信息
 
 **注意**：两种策略使用相同的查询关键词逻辑
@@ -107,7 +112,7 @@
 
 **两种策略同时执行，同等优先级：**
 
-1. **始终执行策略 1**：通过 `load_session.py` 从 `.testbuddy/env/session.json` 获取 `token` 和 `knowledge_uids`，调用 MCP 工具检索会话相关知识
+1. **始终执行策略 1**：通过 `get_session.py` 从 `.testbuddy/env/session.json` 获取 `token` 和 `knowledge_uids`，调用 MCP 工具检索会话相关知识
    - **重要**：如需使用多个关键词，需要**分批调用** MCP 工具，每个关键词调用一次
 2. **同时检查策略 2**：如果上下文包含 `<attached_files>` 区域，同时执行 `RAG_search` 检索附加文件内容
 3. **结果合并**：将两种策略的检索结果合并展示，提供更全面的知识覆盖
@@ -116,7 +121,7 @@
 开始检索
     ↓
 并行执行两个策略：
-    ├─ 策略 1: 执行 load_session.py
+    ├─ 策略 1: 执行 get_session.py
     │           ↓
     │       读取 .testbuddy/env/session.json
     │           ↓
@@ -150,9 +155,9 @@
 
 1. **策略 1 执行（如需多个关键词，分批调用）：**
 
-```bash
+```shell
 # 步骤 1: 获取会话信息
-python <script_dir>/scripts/load_session.py
+python <script_dir>/scripts/get_session.py
 
 # 输出示例（从 .testbuddy/env/session.json 读取）：
 # {
@@ -228,7 +233,7 @@ RAG_search(
    - 如需使用多个关键词（如"用户登录"、"密码验证"、"权限管理"），对 MCP 工具进行分批调用
    - 每个关键词单独调用一次 `retrieve_knowledge`
    - 将多次调用的结果合并处理
-3. **脚本执行**：确保在工作区根目录执行 `load_session.py` 脚本，**不要 cd 切换目录**
+3. **脚本执行**：确保在工作区根目录执行 `get_session.py` 脚本，**不要 cd 切换目录**
 4. **上下文准备**：如需使用策略 2，确保上下文包含 `<attached_files>` 区域
 5. **结果处理**：综合处理两种策略的检索结果，提供完整的知识视图
 6. **并行执行**：两个策略同时进行，提高检索效率
@@ -238,6 +243,7 @@ RAG_search(
 ## 适用场景
 
 该工具适用于以下场景：
+
 - 查找特定功能的测试用例（从会话和知识库）
 - 检索测试策略和方法论
 - 获取测试场景示例
@@ -251,14 +257,14 @@ RAG_search(
 ## 注意事项
 
 1. **脚本执行路径**：
-   - ⚠️ 执行 `load_session.py` 前**不要切换目录（不要 cd）**
+   - ⚠️ 执行 `get_session.py` 前**不要切换目录（不要 cd）**
    - ✅ 确保在工作区根目录执行
    - `<script_dir>` 是脚本所在路径的前缀（不要写死路径）
 
 2. **session.json 文件**：
    - 位置：`.testbuddy/env/session.json`
    - 必须包含：`token`（用户认证）、`knowledge_uids`（知识库 UID 列表）
-   - `load_session.py` 脚本会自动读取此文件
+   - `get_session.py` 脚本会自动读取此文件
 
 3. **策略 1** 依赖 session.json 文件和 MCP 工具
    - 参数说明：
@@ -282,6 +288,6 @@ RAG_search(
 6. **MCP 工具调用**：
    - 使用 `mcp_get_tool_description` 获取工具描述
    - 使用 `mcp_call_tool` 执行实际检索
-   - 参数从 `load_session.py` 输出中动态提取（不要硬编码）
+   - 参数从 `get_session.py` 输出中动态提取（不要硬编码）
 
 ---

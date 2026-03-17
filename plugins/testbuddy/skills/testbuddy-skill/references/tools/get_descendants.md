@@ -81,6 +81,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 ```
 
 **节点类型显示格式建议**:
+
 - `STORY` → [需求]
 - `BUG` → [缺陷]
 - `FEATURE` → [模块]
@@ -95,6 +96,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 **用户请求**: "查询 custom-cmjAXojn7Q 的所有后代节点"
 
 **操作步骤**:
+
 1. 使用 `read_file` 读取 `.testbuddy/assets/jeriezhang-test.json`
 2. 在AI内部找到 UID 为 "custom-cmjAXojn7Q" 的目标节点
 3. 递归遍历目标节点的所有后代节点
@@ -105,6 +107,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 **用户请求**: "查询 custom-cmjAXojn7Q 的所有测试点后代"
 
 **操作步骤**:
+
 1. 读取脑图文件
 2. 找到目标节点
 3. 递归遍历所有后代节点
@@ -119,6 +122,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 **用户请求**: "查询 custom-cmjAXojn7Q 的直接子节点"
 
 **操作步骤**:
+
 1. 读取脑图文件
 2. 找到目标节点
 3. 递归遍历所有后代节点
@@ -133,6 +137,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 **用户请求**: "查询 custom-cmjAXojn7Q 下所有P0优先级的测试用例"
 
 **操作步骤**:
+
 1. 读取脑图文件
 2. 找到目标节点
 3. 递归遍历所有后代节点
@@ -149,6 +154,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 **用户请求**: "查询 custom-cmjAXojn7Q 下包含'登录'关键词的、P0优先级的测试用例"
 
 **操作步骤**:
+
 1. 读取脑图文件
 2. 找到目标节点
 3. 递归遍历所有后代节点
@@ -174,7 +180,7 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
     "Description": "节点描述",
     "Path": "节点路径",
     "Level": "节点层级（相对于根节点）",
-    "Order": "节点顺序",
+    "Order": "节点顺序"
   },
   "Spec": {
     "Instance": {
@@ -194,12 +200,14 @@ Agent应该直接使用 `read_file` 工具读取脑图JSON文件，然后在AI�
 ## 常见查询场景
 
 ### 1. 查询所有后代节点
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 → 找到该节点下的所有子孙节点
 ```
 
 ### 2. 按类型查询后代
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 kind: "TEST_POINT"
@@ -207,6 +215,7 @@ kind: "TEST_POINT"
 ```
 
 ### 3. 按层级限制查询
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 max_level: 2
@@ -214,6 +223,7 @@ max_level: 2
 ```
 
 ### 4. 查询特定关键词的后代
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 query: "登录"
@@ -221,6 +231,7 @@ query: "登录"
 ```
 
 ### 5. 查询高优先级用例后代
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 kind: "CASE"
@@ -229,6 +240,7 @@ priority: "P0"
 ```
 
 ### 6. 组合条件查询
+
 ```
 target_uid: "custom-cmjAXojn7Q"
 kind: "CASE"
@@ -242,6 +254,7 @@ max_level: 3
 相对层级 = 后代节点Level - 目标节点Level
 
 例如：
+
 - 目标节点 Level = 3
 - 后代节点 Level = 5
 - 相对层级 = 5 - 3 = 2（表示是目标节点的孙节点）
@@ -260,6 +273,7 @@ max_level: 3
 ## 输出建议
 
 查询结果应该包含：
+
 - 目标节点的基本信息（UID、名称、类型）
 - 匹配的后代节点总数
 - 每个后代节点的关键信息（UID、名称、类型、相对层级等）

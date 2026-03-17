@@ -12,13 +12,17 @@
 脚本支持以下三种格式：
 
 ### 1. JSON 格式 (.json)
+
 标准的 JSON 数组格式。
 
 ### 2. YAML 格式 (.yaml/.yml)
+
 标准的 YAML 数组格式。
 
 ### 3. Markdown 格式 (.md)
+
 直接使用 Markdown 标题层级表示节点结构：
+
 - `## 模块名称` → FEATURE 节点
 - `### 场景名称` → SCENE 节点
 - `#### 测试点名称` → TEST_POINT 节点
@@ -26,8 +30,7 @@
 
 **说明**：Markdown 文件可以直接使用，脚本会自动解析结构中的字段。
 
-Markdown 中也支持使用 ```json 或 ```yaml 代码块包裹节点数据。
----
+## Markdown 中也支持使用 `json 或 `yaml 代码块包裹节点数据。
 
 ## 完整操作流程
 
@@ -36,11 +39,13 @@ Markdown 中也支持使用 ```json 或 ```yaml 代码块包裹节点数据。
 在执行更新命令前，**必须先校验**临时文件的节点格式是否符合预期。
 
 **校验命令**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **校验成功输出**：
+
 ```json
 {
   "status": "success",
@@ -55,6 +60,7 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **校验失败输出**：
+
 ```json
 {
   "status": "error",
@@ -65,6 +71,7 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 ```
 
 **如果校验失败**：
+
 - ❌ **不要执行更新命令**
 - ✅ 根据错误信息修正文件内容
 - ✅ 重新校验直到通过
@@ -75,18 +82,21 @@ python3 <script_dir>/scripts/validate_nodes.py <file_path>
 **前置条件**：步骤1校验通过
 
 **命令格式**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/write_node_from_file.py update <design_uid> <file_path>
 ```
 
 **示例**：
-```bash
+
+```shell
 python3 <script_dir>/scripts/write_node_from_file.py update design-Az7SsiL3Ui /tmp/nodes_update.json
 ```
 
 **优点**：支持批量更新、多种格式（JSON/YAML/Markdown）、无命令行长度限制
 
 **参数说明**：
+
 - `<script_dir>`: 脚本目录的绝对路径（通常为 `.codebuddy/skills/testbuddy-skill`）
 - `validate`: 操作类型（校验格式，使用 validate_nodes.py 脚本）
 - `update`: 操作类型（更新节点，使用 write_node_from_file.py 脚本）
@@ -101,11 +111,12 @@ python3 <script_dir>/scripts/write_node_from_file.py update design-Az7SsiL3Ui /t
 
 执行脚本获取 session 信息：
 
-```bash
-python3 <script_dir>/scripts/load_session.py
+```shell
+python3 <script_dir>/scripts/get_session.py
 ```
 
 **输出示例**：
+
 ```json
 {
   "design_uid": "design-yeAkhG7cH5",
@@ -135,6 +146,7 @@ python3 <script_dir>/scripts/load_session.py
 ## 命令执行输出
 
 ### 成功输出示例
+
 ```json
 {
   "status": "success",
@@ -151,6 +163,7 @@ python3 <script_dir>/scripts/load_session.py
 ```
 
 ### 失败输出示例
+
 ```json
 {
   "status": "error",
@@ -163,6 +176,7 @@ python3 <script_dir>/scripts/load_session.py
 ## 节点数据格式
 
 ### 节点类型枚举
+
 - `STORY` - 需求
 - `BUG` - 缺陷
 - `FEATURE` - 功能模块
@@ -171,6 +185,7 @@ python3 <script_dir>/scripts/load_session.py
 - `CASE` - 测试用例
 
 ### 用例（CASE）节点
+
 ```json
 {
   "uid": "case-cf89EaXfQ2",
@@ -192,6 +207,7 @@ python3 <script_dir>/scripts/load_session.py
 ```
 
 ### 需求或缺陷（STORY/BUG）节点
+
 ```json
 {
   "uid": "story-DeFgHiJkLm",
@@ -210,6 +226,7 @@ python3 <script_dir>/scripts/load_session.py
 ```
 
 ### 其它类型（FEATURE/SCENE/TEST_POINT）节点
+
 ```json
 {
   "uid": "test_point-Kx9Yz8Wv7U",
@@ -225,7 +242,7 @@ python3 <script_dir>/scripts/load_session.py
 
 ## 使用示例
 
-```bash
+```shell
 # 1. 校验节点格式
 python3 <script_dir>/scripts/validate_nodes.py /path/to/nodes.md
 
@@ -233,7 +250,7 @@ python3 <script_dir>/scripts/validate_nodes.py /path/to/nodes.md
 python3 <script_dir>/scripts/write_node_from_file.py update <design_uid> /path/to/nodes.md
 
 # 3. 获取会话参数并渲染画布
-python3 <script_dir>/scripts/load_session.py
+python3 <script_dir>/scripts/get_session.py
 # 调用 MCP 工具 show_node 渲染
 ```
 
@@ -242,21 +259,27 @@ python3 <script_dir>/scripts/load_session.py
 ## 常见更新场景
 
 ### 1. 重命名节点
+
 只更新 `name` 字段
 
 ### 2. 修改描述
+
 只更新 `description` 字段
 
 ### 3. 调整优先级
+
 更新 `instance.priority` 字段（CASE类型）
 
 ### 4. 完善测试步骤
+
 更新 `instance.steps` 数组（CASE类型）
 
 ### 5. 修改前置条件
+
 更新 `instance.preconditions` 字段（CASE类型）
 
 ### 6. 更新需求信息
+
 更新 `instance` 的相关字段（STORY/BUG类型）
 
 ---
@@ -276,7 +299,7 @@ python3 <script_dir>/scripts/load_session.py
 
 2. **MCP 渲染（必须）**：
    - 节点操作成功后，**必须调用 MCP 工具** `show_node` 渲染节点
-   - 参数从 `python3 <script_dir>/scripts/load_session.py` 获取
+   - 参数从 `python3 <script_dir>/scripts/get_session.py` 获取
    - 工具：`mcp_call_tool`，服务：`testbuddy_tools`，工具名：`show_node`
 
 3. **必填字段**：更新时必须包含 uid、name、description、kind、parent_uid 字段
@@ -308,4 +331,3 @@ python3 <script_dir>/scripts/load_session.py
 - `P1` - 高优先级（重要功能）
 - `P2` - 中优先级（一般功能）
 - `P3` - 低优先级（边缘场景）
-
