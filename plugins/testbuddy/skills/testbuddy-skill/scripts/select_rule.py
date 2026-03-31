@@ -15,12 +15,18 @@ if sys.platform == "win32":
 
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-# 规则目录路径
-RULES_DIR = os.path.join(os.getcwd(), ".codebuddy/rules")
-
 # 获取脚本所在目录（用于定位默认规则）
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(SCRIPT_DIR)
+
+# 确保脚本所在目录在 sys.path 中，以便正确导入同目录模块
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+
+from get_session import _find_workspace_root  # noqa: E402
+
+# 规则目录路径（自动查找工作区根目录，避免因 cd 到错误目录导致路径错误）
+RULES_DIR = os.path.join(_find_workspace_root(), ".codebuddy/rules")
 
 # 默认规则映射表（当没有自定义规则时使用）
 DEFAULT_RULES = {

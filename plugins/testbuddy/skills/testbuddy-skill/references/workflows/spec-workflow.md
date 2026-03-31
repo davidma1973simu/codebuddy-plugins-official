@@ -62,48 +62,20 @@ provider:
 
 **步骤 1：确认参考节点**
 
-- **方式一**：从 `.testbuddy/env/session.json` 文件获取参考节点信息
-- **方式二**：使用 `search_node` 工具（位于 `references/tools/search_node`）从脑图节点中查询参考节点信息
+- **方式一**：从对话上下文中读取（SKILL加载时已执行 get_session，结果在上下文中）
+- **方式二**：使用 `get_session` 工具（位于 `references/tools/get_session.md`）读取会话信息
+- **方式三**：使用 `search_nodes` 工具（位于 `references/tools/search_nodes.md`）从脑图节点中查询
 - 读取节点信息（包含 uid, name, kind）
 - 如未找到节点信息或信息不完整，提示用户并终止流程
 - **禁止**：从其他文件中获取参考节点
 
 **步骤 2：查找关联需求**
 
-- **方式一**：从 `.testbuddy/env/session.json` 文件获取关联需求信息
-- **方式二**：使用 `search_node` 工具（位于 `references/tools/search_node`）从脑图节点中查询 STORY 或 BUG 类型的需求节点
+- **方式一**：从对话上下文中读取（SKILL加载时已执行 get_session，结果在上下文中）
+- **方式二**：使用 `get_session` 工具（位于 `references/tools/get_session.md`）读取会话信息
+- **方式三**：使用 `search_nodes` 工具（位于 `references/tools/search_nodes.md`）从脑图查询 STORY 或 BUG 类型节点
 - 如未找到需求节点信息，提示用户并终止
 - **禁止**：从其他文件中获取需求信息
-
-**步骤 2.5：确保 STORY/BUG 节点存在**
-
-脑图的节点层级结构为：**DESIGN → STORY/BUG → FEATURE/SCENE/TEST_POINT/CASE**。框架等子节点必须挂在 STORY/BUG 节点下才能正确渲染。因此在生成框架前，必须先确保脑图中存在 STORY/BUG 节点作为父节点。
-
-- **判断条件**：步骤 1-2 中未找到 STORY 或 BUG 类型的节点（无论是 chat 模式还是 mindmap 模式，只要脑图中不存在 STORY/BUG 节点就需要创建）
-- **执行逻辑**：
-  1. 根据需求信息构造一个 STORY（或 BUG）节点，格式如下：
-     ```json
-     [
-       {
-         "uid": "story-{10位随机字符}",
-         "name": "{需求标题}",
-         "description": "{需求描述摘要}",
-         "kind": "STORY",
-         "parent_uid": "{design_uid}",
-         "instance": {
-           "workspace": "{TAPD工作空间ID}",
-           "issue_id": "{TAPD需求ID}"
-         }
-       }
-     ]
-     ```
-  2. 将 STORY 节点写入临时文件，使用 `validate_nodes` 校验后通过 `add_nodes` 添加到脑图
-  3. **记录此 STORY 节点的 uid**，后续生成的所有框架节点的 `parent_uid` 必须指向这个 STORY 节点的 uid
-- **如果已存在 STORY/BUG 节点**：跳过创建，直接使用已有节点的 uid 作为后续子节点的 parent_uid
-- **关键约束**：
-  - STORY 节点的 `parent_uid` 必须是 `design_uid`（测试设计的 uid）
-  - STORY 节点的 `instance` 必须包含 `workspace`（TAPD工作空间ID）和 `issue_id`（需求ID）
-  - 如果是 BUG 类型需求，将 `kind` 设为 `"BUG"`
 
 **步骤 3：需求分析**
 
@@ -132,10 +104,10 @@ provider:
 
 **步骤 4：检索需求知识库（仅在有知识库时执行）**
 
-- **触发条件**：检查 `<attached_files>` 区域中是否包含知识库文件
-  - **如无知识库**：跳过步骤4和步骤5，直接进入步骤6
-  - **如有知识库**：继续执行本步骤
-- **使用工具**：`RAG_search`
+- **触发条件**：通过 `get_session.py` 获取 `knowledge_uids`，或检查上下文中是否包含 `<attached_files>` 区域
+  - **如无 knowledge_uids 且无 attached_files**：跳过步骤4和步骤5，直接进入步骤6
+  - **如有 knowledge_uids 或 attached_files**：继续执行本步骤
+- **使用工具**：`rag_search`（位于 `references/tools/rag_search.md`）
 - **检索目标**：从需求分析结果中提取关键词进行检索
   - **关键词提取方法**：
     - 从步骤3的需求分析结果中识别核心功能模块（如"用户登录"、"权限管理"、"数据导出"）
@@ -146,25 +118,18 @@ provider:
     - **优先策略**：使用 2-3 个核心关键词组合检索（如"用户登录 密码验证"），获取高相关性内容
     - **补充策略**：如组合检索结果不足，可针对单个重要关键词补充检索
     - 检索与需求相关的技术规范、业务规则、实现方案
-  - **结果合并**：将检索到的知识库内容与步骤3的需求分析结果合并
-    - 在需求分析文档末尾追加 "## 知识库参考信息" 章节
-    - 整理检索内容，标注来源和关联性
-    - 合并后的完整文档作为后续用例生成的输入
-- **知识库名称**：从 `<attached_files>` 中提取
+  - **结果合并**：将检索到的知识库内容与步骤3的需求分析结果合并 - 在需求分析文档末尾追加 "## 知识库参考信息" 章节 - 整理检索内容，标注来源和关联性 - 合并后的完整文档作为后续用例生成的输入
+    **步骤 5：检索用例知识库（仅在有知识库时执行）**
 
-**步骤 5：检索用例知识库（仅在有知识库时执行）**
-
-- **触发条件**：检查 `<attached_files>` 区域中是否包含知识库文件
-  - **如无知识库**：跳过本步骤，直接进入步骤6
-  - **如有知识库**：继续执行本步骤
-- **使用工具**：`RAG_search`
+- **触发条件**：通过 `get_session.py` 获取 `knowledge_uids`，或检查上下文中是否包含 `<attached_files>` 区域
+  - **如无 knowledge_uids 且无 attached_files**：跳过本步骤，直接进入步骤6
+  - **如有 knowledge_uids 或 attached_files**：继续执行本步骤
+- **使用工具**：`rag_search`（位于 `references/tools/rag_search.md`）
 - **检索目标**：根据功能关键词检索历史测试用例
   - 从参考节点中提取功能关键词（如"密码验证"、"表单提交"等）
   - 检索历史测试用例和测试策略
   - 用途：复用测试思路，参考历史测试策略
-- **知识库名称**：从 `<attached_files>` 中提取
-
-**步骤 6：测试点设计**
+    **步骤 6：测试点设计**
 
 - **使用工具**：`select_rule`（位于 `references/tools/select_rule`），传入关键词"spec测试点生成"
 - **根据返回结果**：
@@ -212,5 +177,10 @@ provider:
 
 **步骤 7：添加节点到脑图**
 
-- **使用工具**：`add_nodes`
-- **说明**：将生成的模块节点添加到脑图并渲染，参考 `references/tools/add_nodes.md`
+- **使用工具**：`write_nodes`（位于 `references/tools/write_nodes.md`）的 `add` 操作
+- **⚠️ 必须先读取** `references/tools/write_nodes.md` 工具定义，了解命令格式和参数要求
+- **执行方式**：
+  1. 将步骤 7 生成的节点数据写入临时文件（JSON 格式）
+  2. 按照 `write_nodes.md` 中的命令格式，执行 `write_node.py add <file_path>` 命令（如果 session 中有 `design_uid` 则通过 `--design_uid` 传入，没有则不传）
+  3. 检查命令输出，确认节点添加成功
+- **禁止跳过此步骤**：无论任何模式，只要前面步骤生成了节点数据，就必须执行此步骤将节点写入脑图

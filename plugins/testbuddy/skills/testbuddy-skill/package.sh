@@ -62,7 +62,7 @@ if [ ${#missing_files[@]} -gt 0 ]; then
 fi
 
 # 检查子目录
-required_dirs=("tools" "workflows")
+required_dirs=("references/tools" "references/workflows" "scripts")
 missing_dirs=()
 for dir in "${required_dirs[@]}"; do
   if [ ! -d "${SOURCE_DIR}/${dir}" ]; then
