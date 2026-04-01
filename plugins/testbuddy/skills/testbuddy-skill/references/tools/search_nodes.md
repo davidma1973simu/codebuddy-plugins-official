@@ -1,288 +1,123 @@
 # search_nodes
 
-搜索节点信息。根据运行模式自动选择数据源。
+查询脑图节点的详细信息。支持按 UID 列表查询指定节点，或不传 uids 查询整个 design 下所有节点。通过执行 `search_node.py` 脚本完成查询，指定 uids 时优先从本地脑图文件查询，本地文件不存在或未指定 uids 时自动调用远程接口。
 
-## 🚨 重要说明
-
-**操作过程中不要创建任何临时脚本或代码文件。**
-
-## 模式判断
-
-根据 `get_session` 返回的 `mode` 字段选择不同的搜索方式：
-
-| mode      | 搜索方式                                   |
-| --------- | ------------------------------------------ |
-| `mindmap` | 读取本地脑图 JSON 文件搜索（原有逻辑）     |
-| `chat`    | 从 session.json 中读取用户补充的上下文信息 |
+**⚠️ 重要**：执行脚本前**不要切换目录（不要 cd）**，确保在工作区根目录执行。
+**⚠️ 重要**：**操作过程中不要创建任何临时脚本或代码文件。**
 
 ---
 
-## 脑图模式（mindmap）
+## 命令格式
 
-Agent 直接使用 `read_file` 工具读取脑图JSON文件，然后在AI内部进行匹配和过滤。
-
-### 操作步骤
-
-#### 1. 读取脑图文件
-
-```
-脑图文件路径: .testbuddy/assets/{design_uid}.json
+```shell
+python3 <script_dir>/scripts/search_node.py --design_uid <design_uid> [--namespace <namespace>] [--uids <uid1> [uid2 ...]] [--ancestor] [--no-descendant] [--kind <KIND>]
 ```
 
-使用 `read_file` 工具读取完整的JSON文件。
+**参数说明**：
 
-### 2. 在AI内部递归遍历节点树
+| 参数              | 是否必填 | 说明                                                                  |
+| ----------------- | -------- | --------------------------------------------------------------------- |
+| `--namespace`     | 可选     | 命名空间（不填时后端从 token 中获取）                                 |
+| `--design_uid`    | 必填     | 设计文件的唯一标识（如：`design-Az7SsiL3Ui`）                         |
+| `--uids`          | 可选     | 节点 UID 列表，支持多个，空格分隔（不填时查询整个 design 下所有节点） |
+| `--ancestor`      | 可选     | 加上此标志，同时返回目标节点的所有祖先节点                            |
+| `--no-descendant` | 可选     | 加上此标志，不返回后代节点（**默认返回后代节点**）                    |
+| `--kind`          | 可选     | 节点类型过滤，如 `CASE`、`FEATURE`、`STORY`、`TEST_POINT` 等          |
 
-从根节点的 `Children` 数组开始，递归遍历所有节点。
+- `<script_dir>`：脚本目录的绝对路径（通常为 `.codebuddy/skills/testbuddy-skill`）
 
-### 3. 应用过滤条件
+---
 
-根据用户提供的过滤条件匹配节点：
+## 查询策略
 
-#### 支持的过滤条件
+1. **mindmap 模式优先本地查询**：指定 uids 时，从 `.testbuddy/assets/{design_uid}.json` 读取脑图文件，按 uid 精确匹配，速度快
+2. **chat 模式或本地不存在时走远程**：chat 模式直接调用远程接口，mindmap 模式本地文件不存在时也自动降级到远程接口（需要 token）
 
-```
-- query: 关键词（模糊匹配节点名称或描述，不区分大小写）
-- kind: 节点类型（精确匹配）
-  * STORY - 需求
-  * BUG - 缺陷
-  * FEATURE - 功能模块
-  * SCENE - 测试场景
-  * TEST_POINT - 测试点
-  * CASE - 测试用例
-- parent_uid: 父节点UID（精确匹配）
-- priority: 优先级（仅CASE类型，精确匹配）
-  * P0, P1, P2, P3
-```
+---
 
-### 4. 匹配逻辑
+## 支持的节点类型（--kind）
 
-```
-对于每个节点：
-1. 跳过根节点（Kind == "DESIGN"）
-2. 如果提供了query，检查节点Name或Description是否包含关键词（不区分大小写）
-3. 如果提供了kind，检查节点Kind是否等于指定值
-4. 如果提供了parent_uid，检查节点ParentUid是否等于指定值
-5. 如果提供了priority（且节点Kind为CASE），检查Spec.Instance.Priority是否等于指定值
-6. 所有条件都匹配时，将节点加入结果集
-```
+| Kind         | 说明     |
+| ------------ | -------- |
+| `STORY`      | 需求节点 |
+| `BUG`        | 缺陷节点 |
+| `FEATURE`    | 功能模块 |
+| `SCENE`      | 测试场景 |
+| `TEST_POINT` | 测试点   |
+| `CASE`       | 测试用例 |
 
-### 5. 返回结果格式
+---
 
-以清晰的文本格式呈现搜索结果：
+## 命令执行输出
 
-```
-找到 X 个匹配节点：
-
-1. [节点类型] 节点名称
-   - UID: xxx-xxxxxxxxxx
-   - 父节点UID: xxx-xxxxxxxxxx
-   - 层级: X
-   - 路径: design-xxx/parent-xxx/...
-   - 顺序: X
-   - [仅CASE] 优先级: P0/P1/P2/P3
-   - 描述: ...
-
-2. ...
-```
-
-**节点类型显示格式建议**:
-
-- `STORY` → [需求]
-- `BUG` → [缺陷]
-- `FEATURE` → [模块]
-- `SCENE` → [场景]
-- `TEST_POINT` → [测试点]
-- `CASE` → [用例]
-
-## 完整操作示例
-
-### 示例1: 搜索登录相关的测试点
-
-**用户请求**: "搜索所有包含'登录'的测试点"
-
-**操作步骤**:
-
-1. 使用 `read_file` 读取 `.testbuddy/assets/jeriezhang-test.json`
-2. 在AI内部遍历所有节点
-3. 应用过滤条件：
-   - query: "登录"
-   - kind: "TEST_POINT"
-4. 匹配逻辑：
-   - 检查每个节点的 `Meta.Name` 或 `Meta.Description` 是否包含"登录"（不区分大小写）
-   - 且 `Meta.Kind` == "TEST_POINT"
-5. 输出匹配的节点列表
-
-### 示例2: 查找指定父节点下的所有子节点
-
-**用户请求**: "查找 custom-cmjAXojn7Q 下的所有子节点"
-
-**操作步骤**:
-
-1. 读取脑图文件
-2. 遍历所有节点
-3. 应用过滤条件：
-   - parent_uid: "custom-cmjAXojn7Q"
-4. 匹配逻辑：
-   - 检查 `Meta.ParentUid` == "custom-cmjAXojn7Q"
-5. 输出结果
-
-### 示例3: 搜索P0优先级的测试用例
-
-**用户请求**: "搜索所有P0优先级的测试用例"
-
-**操作步骤**:
-
-1. 读取脑图文件
-2. 遍历所有节点
-3. 应用过滤条件：
-   - kind: "CASE"
-   - priority: "P0"
-4. 匹配逻辑：
-   - 检查 `Meta.Kind` == "CASE"
-   - 且 `Spec.Instance.Priority` == "P0"
-5. 输出结果
-
-### 示例4: 组合条件搜索
-
-**用户请求**: "搜索登录相关的、P0优先级的、未执行的测试用例"
-
-**操作步骤**:
-
-1. 读取脑图文件
-2. 遍历所有节点
-3. 应用过滤条件：
-   - query: "登录"
-   - kind: "CASE"
-   - priority: "P0"
-   - exec_state: "NONE"
-4. 匹配逻辑（所有条件都必须满足）：
-   - `Meta.Name` 或 `Meta.Description` 包含"登录"
-   - 且 `Meta.Kind` == "CASE"
-   - 且 `Spec.Instance.Priority` == "P0"
-   - 且 `State.ExecState` == "NONE"
-5. 输出结果
-
-## 节点JSON结构参考
+### 成功输出示例
 
 ```json
 {
-  "Meta": {
-    "Uid": "节点UID",
-    "ParentUid": "父节点UID",
-    "Kind": "节点类型",
-    "Name": "节点名称",
-    "Description": "节点描述",
-    "Path": "节点路径",
-    "Level": "节点层级",
-    "Order": "节点顺序"
-  },
-  "Spec": {
-    "Instance": {
-      "Priority": "优先级(仅CASE)",
-      "PreConditions": "前置条件",
-      "Steps": []
+  "status": "success",
+  "source": "local",
+  "design_uid": "design-Az7SsiL3Ui",
+  "total": 2,
+  "data": [
+    {
+      "uid": "case-cf89EaXfQ2",
+      "name": "用户正常登录测试",
+      "description": "验证用户使用有效凭据成功登录",
+      "kind": "CASE",
+      "parent_uid": "test_point-Kx9Yz8Wv7U"
+    },
+    {
+      "uid": "test_point-Kx9Yz8Wv7U",
+      "name": "登录测试点",
+      "kind": "TEST_POINT",
+      "parent_uid": "feature-Abc123"
     }
-  },
-  "State": {
-    "ExecState": "执行状态",
-    "ReviewState": "审核状态"
-  },
-  "Children": []
+  ]
 }
 ```
 
-## 常见搜索场景
+### 失败输出示例
 
-### 1. 按关键词搜索
-
+```json
+{
+  "status": "error",
+  "msg": "缺少 --uids 参数"
+}
 ```
-query: "登录"
-→ 找到所有名称或描述中包含"登录"的节点
-```
-
-### 2. 按类型搜索
-
-```
-kind: "TEST_POINT"
-→ 找到所有测试点节点
-```
-
-### 3. 查找子节点
-
-```
-parent_uid: "custom-cmjAXojn7Q"
-→ 找到指定父节点下的所有直接子节点
-```
-
-### 4. 搜索未执行的用例
-
-```
-kind: "CASE"
-→ 找到所有测试用例
-```
-
-### 5. 搜索待审核的节点
-
-```
-（暂不支持，因为简化的Node结构中不包含执行和审核状态）
-```
-
-### 6. 搜索高优先级用例
-
-```
-kind: "CASE"
-priority: "P0"
-→ 找到所有P0优先级的测试用例
-```
-
-### 7. 搜索需求或缺陷
-
-```
-kind: "STORY"
-→ 找到所有需求节点
-
-kind: "BUG"
-→ 找到所有缺陷节点
-```
-
-## 注意事项
-
-1. **不要创建脚本**: 直接在AI内部进行匹配和过滤
-2. **大小写不敏感**: query关键词搜索时不区分大小写
-3. **精确匹配**: kind、priority、exec_state、review_state等使用精确匹配
-4. **模糊匹配**: query使用包含匹配（substring）
-5. **跳过根节点**: 根节点Kind为"DESIGN"，搜索时应跳过
-6. **递归遍历**: 需要递归遍历整个节点树
-7. **所有条件AND**: 多个过滤条件同时提供时，使用AND逻辑（都必须满足）
-
-## 输出建议
-
-搜索结果应该包含：
-
-- 匹配节点的总数
-- 每个节点的关键信息（UID、名称、类型、层级等）
-- 如果匹配节点很多，可以考虑分页显示或只显示最相关的前N个
-- 对于CASE类型节点，额外显示优先级信息
 
 ---
 
-## 会话模式（chat）
+## 使用示例
 
-在 chat 模式下，没有本地脑图 JSON 文件可读取。Agent 应该从 session.json 中获取用户在对话中补充的上下文信息。
+```shell
+# 查询整个 design 下所有节点（不传 uids）
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui
 
-### 操作步骤
+# 查询单个节点及其所有后代节点（默认行为）
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui --uids case-cf89EaXfQ2
 
-1. **读取 session.json**：执行 `python3 <skills_dir>/scripts/get_session.py` 获取上下文
-2. **从 session.json 中提取信息**：获取 `user_requirement`、`target_name` 等用户补充的字段
-3. **利用 MCP 工具或 RAG 检索**：如需更多信息，结合 `rag_search` 工具检索知识库
-4. **将检索到的信息作为上下文**：传递给后续工作流使用
+# 批量查询多个节点及其后代
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui --uids uid1 uid2 uid3
 
-### chat 模式下的数据来源
+# 查询节点及其所有祖先节点（了解节点所在层级结构）
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui --uids case-cf89EaXfQ2 --ancestor
 
-| 数据来源               | 说明                                   |
-| ---------------------- | -------------------------------------- |
-| session.json           | 用户通过对话补充的需求描述、目标名称等 |
-| MCP retrieve_knowledge | 从知识库检索的相关业务文档             |
-| RAG_search             | 从附加文件中检索的相关内容             |
-| 用户对话               | Agent 通过追问获取的额外信息           |
+# 只查询节点本身，不返回后代
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui --uids case-cf89EaXfQ2 --no-descendant
+
+# 查询后代节点中只返回测试用例类型
+python3 <script_dir>/scripts/search_node.py --design_uid design-Az7SsiL3Ui --uids feature-Kx9Yz8Wv7U --kind CASE
+
+# 指定 namespace（通常不需要，后端会从 token 自动获取）
+python3 <script_dir>/scripts/search_node.py --namespace my_ns --design_uid design-Az7SsiL3Ui --uids case-cf89EaXfQ2
+```
+
+---
+
+## 注意事项
+
+1. **不要创建脚本**：直接执行 `search_node.py`，不要创建任何辅助脚本
+2. **uid 精确匹配**：`--uids` 参数按 uid 精确查找，不支持模糊匹配；不传 `--uids` 时查询整个 design
+3. **kind 精确匹配**：`--kind` 参数值需大写（如 `CASE`、`FEATURE`）
+4. **token 要求**：远程查询需要 token，token 从 `session.json` 或环境变量 `TESTBUDDY_TOKEN` 读取
+5. **错误处理**：脚本会返回详细的错误信息，根据提示修正参数后重新执行
