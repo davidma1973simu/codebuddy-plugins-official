@@ -29,6 +29,12 @@ mcpTools: TCase, testbuddy_tools
 - 消除所有 TODO 占位符
 - **本步骤完成的标志**：生成完整可执行的测试代码文件
 
+### 步骤3: tcase_uuid 校验与补全
+- 对所有生成的测试函数检查 `tcase_uuid` 字段
+- 若已有 `tcase_uuid`，**禁止修改**，直接跳过
+- 若缺少 `tcase_uuid`：**必须**复用 `design_case_uuid`；若也没有则调用脚本批量生成
+- **本步骤完成的标志**：所有 `tcase_uuid` 均通过 RFC4122 格式校验
+
 ---
 
 ## 执行步骤
@@ -58,6 +64,18 @@ UseSkill: alb-autotest-codegen
 3. **分析接口类型** - 根据接口类型（create/update/delete/get）选择对应测试策略
 4. **生成测试代码** - 参考 `references/example-complete.md` 生成符合规范的代码
 5. **代码完整性验证** - 逐项检查基础规范、测试流程完整性、代码质量
+
+### 步骤 3: tcase_uuid 校验与补全
+
+文件写入完成后，**必须**对所有生成的测试函数执行以下校验：
+
+1. **已有 `tcase_uuid` → 禁止修改**：若测试函数已存在合法的 `tcase_uuid`（符合 RFC4122 格式），直接跳过，不得覆盖。
+2. **缺少 `tcase_uuid` 时，必须复用 `design_case_uuid`**：若函数没有 `tcase_uuid` 但 docstring / 元信息中有 `design_case_uuid`，直接将 `tcase_uuid` 赋值为相同的值，无需调用生成脚本。
+3. **批量生成**：若函数既没有 `tcase_uuid` 也没有 `design_case_uuid`，提取函数名调用脚本批量生成：
+   ```bash
+   python3 <skill_dir>/scripts/generate_tcase_uuid.py <repo> <branch> '["func_name_1", "func_name_2", ...]'
+   ```
+4. **格式校验（强制）**：检查所有 `tcase_uuid` 均符合标准 RFC4122 格式（`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`），非标准格式必须替换为真实 UUID，不得跳过。
 
 ---
 
@@ -108,3 +126,4 @@ UseSkill: alb-autotest-codegen
 5. 生成完整测试代码
 6. 写入文件
 7. 验证是否遗漏要求或者步骤，若遗漏则完善代码
+8. tcase_uuid 校验与补全

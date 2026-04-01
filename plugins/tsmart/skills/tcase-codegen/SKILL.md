@@ -75,7 +75,7 @@ disable: false
 - [ ] 代码质量检查通过：零 TODO、零 pass、导入完整、author 已替换为真实用户名
 - [ ] **已调用 write_to_file / replace_in_file 将代码写入 `order` 指定的目标路径**
 - [ ] **已调用 read_file 验证文件存在且内容正确**
-- [ ] **确保`tcase_uuid`字段一定存在且为标准 UUID 格式**：提取所有测试用例函数名，一次性调用 `python3 <skill_dir>/scripts/generate_tcase_uuid.py <repo> <branch> '["func_name_1", "func_name_2", ...]'`（数组长度不限，按实际函数数量传入）批量生成，返回 JSON 映射，逐个打标到对应函数；写入完成后必须校验所有 `tcase_uuid` 的值均为标准 RFC4122 UUID 格式（`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`），非标准格式（如占位符）必须替换为真实 UUID 后才能通过检查
+- [ ] **确保`tcase_uuid`字段一定存在且为标准 UUID 格式**：优先复用 `design_case_uuid`——如果该测试函数的 docstring/元信息中已有 `design_case_uuid`，则 `tcase_uuid` 直接取与 `design_case_uuid` 相同的值，无需调用生成脚本；仅当测试函数没有 `design_case_uuid` 时，才提取函数名调用 `python3 <skill_dir>/scripts/generate_tcase_uuid.py <repo> <branch> '["func_name_1", ...]'` 批量生成；写入完成后必须校验所有 `tcase_uuid` 的值均为标准 RFC4122 UUID 格式（`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`），非标准格式（如占位符）必须替换为真实 UUID 后才能通过检查
 
 **[阻断] MCP 只返回指令和素材，不会生成代码也不会写入文件。你必须亲自完成代码生成和文件写入，否则不得进入检查点6。**
 **[要求] 一次搜索无结果不是失败条件，必须继续沿别名、封装层、调用链和相似测试扩展搜索后再完成代码生成。**
@@ -232,6 +232,7 @@ disable: false
 - 每批次完成后立即写入，不等待所有批次
 - 跟踪每个用例的生成状态
 - 在 parametrize 用例中，每个参数化组合对应一个独立的 tcase_uuid
+- `tcase_uuid` 复用规则：如果测试函数有 `design_case_uuid`，`tcase_uuid` 直接复用该值；没有时才调用脚本生成
 
 **输出要求：**
 - 所有UUID的处理结果（成功/失败数量）

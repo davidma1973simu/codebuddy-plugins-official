@@ -150,7 +150,7 @@ if [ -z "$USER_NAME" ]; then USER_NAME="TCase user"; fi
 | author 已替换 | 使用真实用户名 |
 | tcase_uuid 逐函数打标 | 同一个文件中每个 `test_` 函数必须在函数签名下方独立标注 `tcase_uuid`，严禁省略或共用；标注位置优先参考仓库已有的元信息方式（装饰器/docstring/注解），无先例则用注释 `# tcase_uuid: <值>`；已有非空且为标准 UUID 格式的值禁止修改（占位符除外） |
 
-> **tcase_uuid 生成方式**：提取所有测试用例函数名，一次性调用 `python3 <skill_dir>/scripts/generate_tcase_uuid.py <repo> <branch> '["func_name_1", "func_name_2", ...]'`（数组长度不限，按实际函数数量传入）批量生成，返回 JSON 映射，逐个打标到对应函数。**建议在写入文件前先获取真实 UUID，直接嵌入代码，避免使用占位符再替换。**
+> **tcase_uuid 生成方式**：**优先复用 `design_case_uuid`**——如果该测试函数的 docstring/元信息中已有 `design_case_uuid`，则 `tcase_uuid` 直接取与 `design_case_uuid` 相同的值，无需调用生成脚本；仅当测试函数没有 `design_case_uuid` 时，才提取函数名，一次性调用 `python3 <skill_dir>/scripts/generate_tcase_uuid.py <repo> <branch> '["func_name_1", "func_name_2", ...]'`（数组长度不限，按实际函数数量传入）批量生成，返回 JSON 映射，逐个打标到对应函数。**建议在写入文件前先确定每个函数的 tcase_uuid 值，直接嵌入代码，避免使用占位符再替换。**
 
 ### 第5步：写入文件
 
