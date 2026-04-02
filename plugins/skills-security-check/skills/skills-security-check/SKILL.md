@@ -61,7 +61,8 @@ description: "腾讯云鼎实验室出品，Skill安全审查工具。对用户�
 | ------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | skill.md中Python示例有SQL注入               | ❌**不报告** | 仅是教学代码，skill不自动执行                                                                                       |
 | skill自动执行 `curl \| bash`               | ✅**需报告** | skill自动执行远程脚本，触发步骤4深度分析后根据远程内容定级（Malicious或Suspicious）                                 |
-| 配套脚本 `init.sh`包含 `npm install -g` | ✅**需报告** | skill自动执行全局安装，需结合安装内容判断风险：安装已知官方工具（如 typescript）→ 风险较低；安装未知包 → 风险较高 |
+| 配套脚本 `init.sh`包含 `npm install -g typescript@5.0.0` | ❌**不报告** | skill自动执行全局安装但**版本已固定**，无投毒风险                                                                   |
+| 配套脚本 `init.sh`包含 `npm install -g some-tool` | ✅**需报告** | skill自动执行全局安装**未固定版本**，可能拉取被投毒的最新版本 → Suspicious                                           |
 
 ## 执行逻辑
 
@@ -169,20 +170,29 @@ description: "腾讯云鼎实验室出品，Skill安全审查工具。对用户�
 
 #### 5.1 全局依赖安装检测（不仅限于以下示例）
 
-搜索全局安装模式，关键看**是否在隔离环境中**：
+搜索全局安装**且未固定版本**的模式，关键看：
+1. **是否在隔离环境中**（虚拟环境/容器）
+2. **是否固定版本**（如 `==2.28.1` / `@1.2.3`）
 
-- **Python**：`pip install`（非虚拟环境）、`pip3 install`、`python -m pip install`、`pipx install`、`sudo pip install`
-- **Node.js**：`npm install -g`、`npm i -g`、`yarn global add`、`pnpm add -g`
-- **其他**：`gem install`、`cargo install`、`go install`、`composer global require`、`brew install`
-- 检查是否有虚拟环境创建（`venv`, `virtualenv`, `conda create`）
+**判断标准**：
+- ✅ **固定版本** + 全局安装 → 不报风险（如 `pip install requests==2.28.1`）
+- ⚠️ **未固定版本** + 全局安装 → Suspicious（如 `pip install requests`、`npm install -g tool`）
+- ✅ 虚拟环境中安装（即使未固定版本）→ 风险较低，不报风险
+
+**检测模式**：
+- **Python**：`pip install <包名>`（无 `==`/`>=`/`~=` 版本号）、`pip3 install`、`sudo pip install`
+- **Node.js**：`npm install -g <包名>`（无 `@version`）、`yarn global add`、`pnpm add -g`
+- **其他**：`gem install`、`cargo install`、`go install`、`brew install`
 
 #### 5.2 依赖来源检测
 
-检查是否从非官方源安装：
+检查是否从非官方源或不可信引用安装：
 
-- `pip install -i <非官方镜像源>` / `--index-url <可疑URL>`
+- `pip install -i <非官方镜像源>` / `--index-url <可疑URL>`（无法验证源安全性）
 - `npm install --registry <非官方源>`
-- 从代码仓库直接安装（`pip install git+https://...`）
+- 从代码仓库安装**且未固定 commit SHA**（如 `git+https://...@main` / `git+https://...@v1.0`）
+  - ✅ **已固定 commit SHA** → 不报风险（如 `git+https://repo.git@a1b2c3d4e5f6`）
+  - ⚠️ **分支/tag/未指定** → Suspicious（代码可被随时更新）
 
 ### 步骤6：风险评估和报告生成
 
@@ -252,10 +262,14 @@ Step C: 是否包含恶意意图？
 
 **⚠️ Suspicious - 可疑（环境风险或供应链风险）**：
 
-- skill**自动执行全局安装**依赖：`pip install`（非虚拟环境）、`npm install -g`（环境破坏风险，但被安装包是否投毒超出审计能力）
-- 从非官方源安装依赖（`--index-url <非PyPI>`）（无法验证源的安全性，仅做提醒）
-- 直接从代码仓库安装（`git+https://`）
-- 示例代码中的依赖安装指令**缺少虚拟环境说明**
+- skill **自动执行全局安装未固定版本**的依赖（如 `pip install requests`、`npm install -g tool`）
+  - 投毒风险：未固定版本可能拉取被投毒的最新版本
+  - 不报风险情况：已固定版本（如 `pip install requests==2.28.1`）或在虚拟环境中安装
+- 从非官方源安装依赖（`--index-url <非PyPI>`、`--registry <非官方源>`）
+  - 无法验证源的安全性，仅做提醒
+- 从代码仓库安装**且未固定 commit SHA**（如 `git+https://repo.git@main` / `git+https://...@v1.0`）
+  - 投毒风险：分支/tag 可被随时更新或强制推送
+  - 不报风险情况：已固定 commit SHA（如 `git+https://repo.git@a1b2c3d4e5f6`）
 
 **✅ Benign - 可信（无投毒风险）**：
 
