@@ -1,5 +1,5 @@
 ---
-description: 打开TestBuddy
+description：打开TestBuddy
 allowed-tools: Read,Write,Bash
 ---
 
