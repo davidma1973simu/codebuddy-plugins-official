@@ -1967,6 +1967,18 @@
       "description": "测试用例生成插件",
       "version": "1.6.7",
       "source": "./plugins/testbuddy"
+    },
+    {
+      "name": "tsmart",
+      "description": "AI 驱动测试用例生成与管理工作流，集成 TestBuddy 脑图可视化和 TCase 自动化测试代码生成能力",
+      "version": "1.0.0",
+      "source": "./plugins/tsmart",
+      "author": {
+        "name": "seagullliu",
+        "email": "seagullliu@tencent.com"
+      },
+      "keywords": ["测试用例生成", "自动化测试", "TCase", "TestBuddy", "YottaDB", "ALB", "CloudGame"],
+      "category": "测试工具"
     }
   ]
 }

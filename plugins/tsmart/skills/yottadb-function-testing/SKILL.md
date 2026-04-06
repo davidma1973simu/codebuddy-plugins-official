@@ -2,7 +2,7 @@
 name: yottadb-function-testing
 description: YottaDB 分布式数据库功能测试代码生成工具。当用户需要生成 YottaDB 测试代码、根据 UUID/文本用例/节点生成测试、编写 TSDB/MEMDB/SSDKV 等模块的功能测试时触发此技能。
 allowed-tools: 
-disable: true
+disable: false
 ---
 
 # YottaDB 功能测试代码生成 Skill
