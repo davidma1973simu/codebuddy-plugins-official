@@ -1,0 +1,141 @@
+{
+  "name": "eureka-innovation-team",
+  "version": "1.0.0",
+  "description": "Eureka Innovation Team - an expert team that guides users through the full innovation journey from ideation to business model, powered by 8 specialized innovation experts.",
+  "author": {
+    "name": "Eureka Lab",
+    "email": "eureka@simu4wisdom.com.cn"
+  },
+  "agents": [
+    "./agents/eureka-innovation-team-team-lead.md",
+    "./agents/ideation-scout.md",
+    "./agents/insight-digger.md",
+    "./agents/inspire-creator.md",
+    "./agents/shape-builder.md",
+    "./agents/value-judge.md",
+    "./agents/exam-validator.md",
+    "./agents/pitch-speaker.md",
+    "./agents/business-designer.md"
+  ],
+  "skills": [
+    "./skills/eureka-ideation",
+    "./skills/eureka-insight",
+    "./skills/eureka-inspire",
+    "./skills/eureka-shape",
+    "./skills/eureka-value",
+    "./skills/eureka-exam",
+    "./skills/eureka-pitch",
+    "./skills/eureka-business"
+  ],
+
+  "expertType": "team",
+  "agentName": "eureka-innovation-team-team-lead",
+  "teamInfo": {
+    "leadAgent": "eureka-innovation-team-team-lead",
+    "memberAgents": [
+      "ideation-scout",
+      "insight-digger",
+      "inspire-creator",
+      "shape-builder",
+      "value-judge",
+      "exam-validator",
+      "pitch-speaker",
+      "business-designer"
+    ]
+  },
+
+  "displayName": {
+    "en": "Eureka Innovation Team",
+    "zh": "Eureka 创新教练团"
+  },
+  "profession": {
+    "en": "Eureka Innovation Team",
+    "zh": "Eureka 创新教练团"
+  },
+  "displayDescription": {
+    "en": "A full innovation journey team: identify topics, understand users, generate ideas, build solutions, evaluate value, validate, pitch, and design business models.",
+    "zh": "陪伴你走完创新全旅程：选题、洞察、创意、方案、价值、验证、呈现到商业模式，8 位创新专家一站式护航。"
+  },
+  "avatar": "avatars/team.png",
+  "categoryId": "01-ProductDesign",
+  "defaultInitPrompt": {
+    "zh": "我有一个想做的方向，帮我走一遍完整的创新流程",
+    "en": "I have a direction in mind, help me run through the full innovation journey"
+  },
+  "plugin": "eureka-innovation-team",
+  "tags": [
+    { "en": "Innovation", "zh": "创新方法论" },
+    { "en": "User Insight", "zh": "用户洞察" },
+    { "en": "Business Model", "zh": "商业模式" }
+  ],
+  "quickPrompts": [
+    { "en": "I have a direction in mind, help me run through the full innovation journey", "zh": "我有一个想做的方向，帮我走一遍完整的创新流程" },
+    { "en": "Help me evaluate whether this idea is worth doing", "zh": "帮我评估一下这个想法值不值得做" },
+    { "en": "I'm stuck in my innovation project, help me figure out what to do next", "zh": "我的创新项目卡住了，帮我理一理下一步做什么" }
+  ],
+  "members": [
+    {
+      "id": "eureka-innovation-team-team-lead",
+      "displayName": { "en": "Gu Quancheng", "zh": "顾全程" },
+      "profession": { "en": "Innovation Journey Director", "zh": "创新旅程总监" },
+      "avatar": "avatars/eureka-innovation-team-team-lead.png",
+      "role": "lead"
+    },
+    {
+      "id": "ideation-scout",
+      "displayName": { "en": "Xun Xiangyuan", "zh": "寻向远" },
+      "profession": { "en": "Innovation Topic Scout", "zh": "创新选题专家" },
+      "avatar": "avatars/ideation-scout.png",
+      "role": "member"
+    },
+    {
+      "id": "insight-digger",
+      "displayName": { "en": "Cha Ruwei", "zh": "察入微" },
+      "profession": { "en": "User Insight Expert", "zh": "用户洞察专家" },
+      "avatar": "avatars/insight-digger.png",
+      "role": "member"
+    },
+    {
+      "id": "inspire-creator",
+      "displayName": { "en": "Si Bufan", "zh": "思不凡" },
+      "profession": { "en": "Creative Ideation Expert", "zh": "创意生成专家" },
+      "avatar": "avatars/inspire-creator.png",
+      "role": "member"
+    },
+    {
+      "id": "shape-builder",
+      "displayName": { "en": "Mou Dingxing", "zh": "谋定行" },
+      "profession": { "en": "Solution Architect", "zh": "方案构建专家" },
+      "avatar": "avatars/shape-builder.png",
+      "role": "member"
+    },
+    {
+      "id": "value-judge",
+      "displayName": { "en": "Jia Zhiheng", "zh": "价知衡" },
+      "profession": { "en": "Value Assessment Expert", "zh": "价值评估专家" },
+      "avatar": "avatars/value-judge.png",
+      "role": "member"
+    },
+    {
+      "id": "exam-validator",
+      "displayName": { "en": "Yan Zhenjin", "zh": "验真金" },
+      "profession": { "en": "Validation & Decision Expert", "zh": "验证决策专家" },
+      "avatar": "avatars/exam-validator.png",
+      "role": "member"
+    },
+    {
+      "id": "pitch-speaker",
+      "displayName": { "en": "Jiang Deqing", "zh": "讲得清" },
+      "profession": { "en": "Pitch & Presentation Expert", "zh": "电梯呈现专家" },
+      "avatar": "avatars/pitch-speaker.png",
+      "role": "member"
+    },
+    {
+      "id": "business-designer",
+      "displayName": { "en": "Ying Zaisuan", "zh": "赢在算" },
+      "profession": { "en": "Business Model Expert", "zh": "商业模式专家" },
+      "avatar": "avatars/business-designer.png",
+      "role": "member"
+    }
+  ]
+}
