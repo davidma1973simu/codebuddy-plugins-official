@@ -358,7 +358,7 @@
       "description": "Real-time statusline HUD for Claude Code - displays context usage, tool activity, agent tracking, and todo progress",
       "license": "MIT"
     },
-     {
+    {
       "name": "cloudbase",
       "source": "./plugins/cloudbase",
       "version": "1.0.0",
@@ -1080,7 +1080,12 @@
       },
       "repository": "https://github.com/CodeBuddy/marketplace",
       "license": "MIT",
-      "keywords": ["skills", "ai", "agent", "productivity"],
+      "keywords": [
+        "skills",
+        "ai",
+        "agent",
+        "productivity"
+      ],
       "category": "productivity"
     },
     {
@@ -1977,17 +1982,27 @@
         "name": "seagullliu",
         "email": "seagullliu@tencent.com"
       },
-      "keywords": ["测试用例生成", "自动化测试", "TCase", "TestBuddy", "YottaDB", "ALB", "CloudGame"],
+      "keywords": [
+        "测试用例生成",
+        "自动化测试",
+        "TCase",
+        "TestBuddy",
+        "YottaDB",
+        "ALB",
+        "CloudGame"
+      ],
       "category": "测试工具"
-    }
-  ]
-}
-,
+    },
     {
       "name": "eureka-innovation-team",
       "description": "Eureka 创新团队：由 8 位创新专家组成的专家团，覆盖从选题、用户洞察、创意激发、方案构建、价值评估、验证实验、演讲呈现到商业模式的完整创新旅程。",
       "source": "./external_plugins/eureka-innovation-team",
       "version": "1.0.0",
-      "author": { "name": "把这里换成你的GitHub用户名", "url": "https://github.com/把这里换成你的GitHub用户名" },
+      "author": {
+        "name": "davidma1973simu",
+        "url": "https://github.com/davidma1973simu"
+      },
       "license": "MIT"
     }
+  ]
+}
